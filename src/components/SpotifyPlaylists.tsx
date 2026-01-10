@@ -49,13 +49,15 @@ export function SpotifyPlaylists() {
               className="bg-gray-800 rounded-lg overflow-hidden hover:bg-gray-750 transition-colors group cursor-pointer"
               onClick={() => handlePlayPlaylist(playlist)}
             >
-              <div className="relative">
-                {playlist.images[0] && (
+              <div className="relative h-48 bg-gray-700 flex items-center justify-center">
+                {playlist.images && playlist.images.length > 0 && playlist.images[0]?.url ? (
                   <img
                     src={playlist.images[0].url}
-                    alt={playlist.name}
+                    alt={playlist.name || 'Playlist'}
                     className="w-full h-48 object-cover"
                   />
+                ) : (
+                  <Music className="w-16 h-16 text-gray-500" />
                 )}
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center">
                   <Play className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="currentColor" />
@@ -63,10 +65,10 @@ export function SpotifyPlaylists() {
               </div>
               <div className="p-4">
                 <h3 className="text-white font-semibold mb-1 truncate">
-                  {playlist.name}
+                  {playlist.name || 'Untitled Playlist'}
                 </h3>
                 <p className="text-gray-400 text-sm line-clamp-2">
-                  {playlist.description}
+                  {playlist.description || 'No description available'}
                 </p>
               </div>
             </div>

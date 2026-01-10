@@ -24,7 +24,12 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json();
-    return NextResponse.json(data.playlists?.items || []);
+    const playlists = data.playlists?.items || [];
+    
+    // Filter out any playlists without an ID to prevent errors
+    const validPlaylists = playlists.filter((playlist: any) => playlist && playlist.id);
+    
+    return NextResponse.json(validPlaylists);
   } catch (error) {
     console.error('Error fetching playlists:', error);
     return NextResponse.json(

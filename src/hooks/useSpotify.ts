@@ -3,9 +3,9 @@ import { useCallback, useState } from 'react';
 
 export interface SpotifyPlaylist {
   id: string;
-  name: string;
-  description: string;
-  images: { url: string }[];
+  name: string | null;
+  description: string | null;
+  images?: { url: string }[] | null;
   external_urls: { spotify: string };
 }
 
