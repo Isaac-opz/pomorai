@@ -63,31 +63,44 @@ export const authOptions: NextAuthOptions = {
       authorization: LOGIN_URL,
     }),
   ],
+  secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
-    async jwt({ token, account }) {
-      if (account) {
-        token.accessToken = account.access_token;
-        token.refreshToken = account.refresh_token;
-        token.accessTokenExpires = account.expires_at! * 1000;
+    async jwt({ token, account, user }) {
+      // Initial sign in
+      if (account && user) {
+        return {
+          ...token,
+          accessToken: account.access_token,
+          refreshToken: account.refresh_token,
+          accessTokenExpires: account.expires_at ? account.expires_at * 1000 : 0,
+        };
+      }
+
+      // Return previous token if the access token has not expired yet
+      if (token.accessTokenExpires && Date.now() < (token.accessTokenExpires as number)) {
         return token;
       }
 
-      if (Date.now() < (token.accessTokenExpires as number)) {
-        return token;
+      // Access token has expired, try to refresh it
+      if (token.refreshToken) {
+        return await refreshAccessToken(token);
       }
 
-      return await refreshAccessToken(token);
+      return token;
     },
     async session({ session, token }) {
-      session.accessToken = token.accessToken as string;
-      session.refreshToken = token.refreshToken as string;
-      session.error = token.error as string;
+      if (token) {
+        session.accessToken = token.accessToken as string;
+        session.refreshToken = token.refreshToken as string;
+        session.error = token.error as string;
+      }
       return session;
     },
   },
   pages: {
     signIn: '/',
   },
+  debug: process.env.NODE_ENV === 'development',
 };
 
 const handler = NextAuth(authOptions);

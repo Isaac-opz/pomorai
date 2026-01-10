@@ -9,18 +9,19 @@ export function SpotifyPlaylists() {
   const [playlists, setPlaylists] = useState<SpotifyPlaylist[]>([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      loadPlaylists();
-    }
-  }, [isAuthenticated]);
-
   const loadPlaylists = async () => {
     setLoading(true);
     const results = await searchFocusPlaylists();
     setPlaylists(results);
     setLoading(false);
   };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadPlaylists();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
 
   const handlePlayPlaylist = (playlist: SpotifyPlaylist) => {
     playPlaylist(`spotify:playlist:${playlist.id}`);
