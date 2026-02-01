@@ -2,6 +2,7 @@
 
 import { usePomodoro, PomodoroMode } from '@/hooks/usePomodoro';
 import { Play, Pause, RotateCcw } from 'lucide-react';
+import { GlassButton, ModeButton } from '@/components/ui';
 
 export function PomodoroTimer() {
   const {
@@ -11,18 +12,29 @@ export function PomodoroTimer() {
     start,
     pause,
     reset,
-    switchMode,
+    requestModeChange,
     formatTime,
   } = usePomodoro();
 
   const getModeColor = (currentMode: PomodoroMode) => {
     switch (currentMode) {
       case 'work':
-        return 'bg-red-500';
+        return 'bg-focus-red';
       case 'shortBreak':
-        return 'bg-green-500';
+        return 'bg-break-green';
       case 'longBreak':
-        return 'bg-blue-500';
+        return 'bg-break-blue';
+    }
+  };
+
+  const getModeGlow = (currentMode: PomodoroMode) => {
+    switch (currentMode) {
+      case 'work':
+        return 'glow-focus';
+      case 'shortBreak':
+        return 'glow-break-short';
+      case 'longBreak':
+        return 'glow-break-long';
     }
   };
 
@@ -38,77 +50,110 @@ export function PomodoroTimer() {
   };
 
   return (
-    <div className="flex flex-col items-center space-y-8">
-      <div className="flex space-x-2">
-        <button
-          onClick={() => switchMode('work')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            mode === 'work'
-              ? 'bg-red-500 text-white'
-              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-          }`}
+    <div className="flex flex-col items-center space-y-10">
+      {/* Mode Selection */}
+      <div className="flex gap-3">
+        <ModeButton
+          mode="work"
+          active={mode === 'work'}
+          onClick={() => requestModeChange('work')}
         >
           Work
-        </button>
-        <button
-          onClick={() => switchMode('shortBreak')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            mode === 'shortBreak'
-              ? 'bg-green-500 text-white'
-              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-          }`}
+        </ModeButton>
+        <ModeButton
+          mode="shortBreak"
+          active={mode === 'shortBreak'}
+          onClick={() => requestModeChange('shortBreak')}
         >
           Short Break
-        </button>
-        <button
-          onClick={() => switchMode('longBreak')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            mode === 'longBreak'
-              ? 'bg-blue-500 text-white'
-              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-          }`}
+        </ModeButton>
+        <ModeButton
+          mode="longBreak"
+          active={mode === 'longBreak'}
+          onClick={() => requestModeChange('longBreak')}
         >
           Long Break
-        </button>
+        </ModeButton>
       </div>
 
+      {/* Timer Display */}
       <div className="text-center">
-        <h2 className="text-2xl font-semibold text-gray-300 mb-4">
+        <h2 className="text-2xl font-semibold text-white/80 mb-6 tracking-wide">
           {getModeText(mode)}
         </h2>
-        <div
-          className={`${getModeColor(mode)} rounded-full w-80 h-80 flex items-center justify-center shadow-2xl`}
-        >
-          <div className="text-8xl font-bold text-white">{formatTime()}</div>
+        
+        {/* Glass Timer Circle with Glow Effect */}
+        <div className="relative">
+          <div
+            className={`
+              ${getModeColor(mode)} 
+              ${isRunning ? getModeGlow(mode) : ''}
+              rounded-full 
+              w-80 h-80 
+              flex items-center justify-center 
+              transition-all duration-500
+              glass-card
+              border-4 border-white/10
+            `}
+          >
+            <div className="text-8xl font-bold text-white tracking-tight">
+              {formatTime()}
+            </div>
+          </div>
+          
+          {/* Subtle pulse ring when active */}
+          {isRunning && (
+            <div className={`
+              absolute inset-0 
+              rounded-full 
+              ${getModeColor(mode)}
+              opacity-30
+              animate-ping
+              pointer-events-none
+            `} 
+            style={{ animationDuration: '2s' }}
+            />
+          )}
         </div>
       </div>
 
-      <div className="flex items-center space-x-4">
+      {/* Control Buttons */}
+      <div className="flex items-center gap-5">
         {!isRunning ? (
-          <button
+          <GlassButton
+            variant="solid"
+            size="xl"
             onClick={start}
-            className="bg-white text-gray-900 p-6 rounded-full hover:bg-gray-100 transition-colors shadow-lg"
+            className="rounded-full p-6 hover:scale-105 transition-transform"
           >
-            <Play className="w-8 h-8" fill="currentColor" />
-          </button>
+            <Play className="w-9 h-9" fill="currentColor" />
+          </GlassButton>
         ) : (
-          <button
+          <GlassButton
+            variant="solid"
+            size="xl"
             onClick={pause}
-            className="bg-white text-gray-900 p-6 rounded-full hover:bg-gray-100 transition-colors shadow-lg"
+            className="rounded-full p-6 hover:scale-105 transition-transform"
           >
-            <Pause className="w-8 h-8" fill="currentColor" />
-          </button>
+            <Pause className="w-9 h-9" fill="currentColor" />
+          </GlassButton>
         )}
-        <button
+        
+        <GlassButton
+          variant="glass"
+          size="xl"
           onClick={reset}
-          className="bg-gray-700 text-white p-6 rounded-full hover:bg-gray-600 transition-colors shadow-lg"
+          className="rounded-full p-6 hover:scale-105 transition-transform"
         >
-          <RotateCcw className="w-8 h-8" />
-        </button>
+          <RotateCcw className="w-9 h-9" />
+        </GlassButton>
       </div>
 
-      <div className="text-gray-400 text-sm">
-        Sessions completed: {sessionCount}
+      {/* Session Counter */}
+      <div className="glass-panel px-6 py-3 rounded-full">
+        <p className="text-white/70 text-sm font-medium tracking-wide">
+          Sessions completed: <span className="text-spotify-green font-bold">{sessionCount}</span>
+        </p>
       </div>
     </div>
   );

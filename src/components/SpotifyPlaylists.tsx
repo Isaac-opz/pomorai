@@ -3,6 +3,7 @@
 import { useSpotify, SpotifyPlaylist } from '@/hooks/useSpotify';
 import { useEffect, useState } from 'react';
 import { Music, Play } from 'lucide-react';
+import { GlassCard } from '@/components/ui';
 
 export function SpotifyPlaylists() {
   const { isAuthenticated, searchFocusPlaylists, playPlaylist, setCurrentPlaylist } = useSpotify();
@@ -33,45 +34,62 @@ export function SpotifyPlaylists() {
   }
 
   return (
-    <div className="w-full max-w-4xl mt-12">
-      <div className="flex items-center space-x-2 mb-6">
-        <Music className="w-6 h-6 text-green-500" />
-        <h2 className="text-2xl font-bold text-white">Focus Playlists</h2>
+    <div className="w-full max-w-6xl mt-16">
+      {/* Section Header */}
+      <div className="flex items-center gap-3 mb-8">
+        <div className="p-2 bg-spotify-green/20 rounded-lg glow-spotify">
+          <Music className="w-6 h-6 text-spotify-green" />
+        </div>
+        <h2 className="text-3xl font-bold text-white tracking-tight">Focus Playlists</h2>
       </div>
 
       {loading ? (
-        <div className="text-gray-400 text-center py-8">Loading playlists...</div>
+        <div className="text-white/60 text-center py-16">
+          <div className="inline-flex items-center gap-3">
+            <div className="w-5 h-5 border-2 border-spotify-green border-t-transparent rounded-full animate-spin" />
+            <span className="font-medium">Loading playlists...</span>
+          </div>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {playlists.map((playlist) => (
-            <div
+            <GlassCard
               key={playlist.id}
-              className="bg-gray-800 rounded-lg overflow-hidden hover:bg-gray-750 transition-colors group cursor-pointer"
               onClick={() => handlePlayPlaylist(playlist)}
+              className="overflow-hidden group cursor-pointer"
             >
-              <div className="relative h-48 bg-gray-700 flex items-center justify-center">
+              {/* Playlist Cover Image */}
+              <div className="relative h-56 bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center overflow-hidden">
                 {playlist.images && playlist.images.length > 0 && playlist.images[0]?.url ? (
                   <img
                     src={playlist.images[0].url}
                     alt={playlist.name || 'Playlist'}
-                    className="w-full h-48 object-cover"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 ) : (
-                  <Music className="w-16 h-16 text-gray-500" />
+                  <Music className="w-20 h-20 text-white/20" />
                 )}
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center">
-                  <Play className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="currentColor" />
+                
+                {/* Play Button Overlay */}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-all duration-300 flex items-center justify-center">
+                  <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-75 group-hover:scale-100">
+                    <div className="bg-spotify-green rounded-full p-4 shadow-2xl glow-spotify">
+                      <Play className="w-8 h-8 text-black" fill="currentColor" />
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div className="p-4">
-                <h3 className="text-white font-semibold mb-1 truncate">
+
+              {/* Playlist Info */}
+              <div className="p-5">
+                <h3 className="text-white font-bold text-lg mb-2 truncate group-hover:text-spotify-green-light transition-colors">
                   {playlist.name || 'Untitled Playlist'}
                 </h3>
-                <p className="text-gray-400 text-sm line-clamp-2">
+                <p className="text-white/60 text-sm line-clamp-2 leading-relaxed">
                   {playlist.description || 'No description available'}
                 </p>
               </div>
-            </div>
+            </GlassCard>
           ))}
         </div>
       )}
