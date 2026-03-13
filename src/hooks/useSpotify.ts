@@ -1,5 +1,6 @@
 import { useSession } from "next-auth/react";
 import { useCallback, useState } from "react";
+import useSWR from "swr";
 
 export interface SpotifyPlaylist {
   id: string;
@@ -9,28 +10,31 @@ export interface SpotifyPlaylist {
   external_urls: { spotify: string };
 }
 
+// Global fetcher for SWR
+const fetcher = (url: string) => fetch(url).then((res) => {
+  if (!res.ok) throw new Error("Failed to fetch");
+  return res.json();
+});
+
 export function useSpotify() {
   const { data: session } = useSession();
   const [currentPlaylist, setCurrentPlaylist] =
     useState<SpotifyPlaylist | null>(null);
 
-  const searchFocusPlaylists = useCallback(async () => {
-    if (!session) return [];
-
-    try {
-      const response = await fetch("/api/spotify/playlists");
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch playlists");
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Error searching playlists:", error);
-      return [];
+  // Use SWR for fetching and caching playlists
+  const { 
+    data: playlists, 
+    error, 
+    isLoading, 
+    mutate 
+  } = useSWR<SpotifyPlaylist[]>(
+    session ? "/api/spotify/playlists" : null,
+    fetcher,
+    {
+      revalidateOnFocus: false, // Don't refetch when switching tabs
+      dedupingInterval: 60000, // Consider data fresh for 1 minute
     }
-  }, [session]);
+  );
 
   const playPlaylist = useCallback(
     async (playlistUri: string) => {
@@ -83,7 +87,10 @@ export function useSpotify() {
 
   return {
     isAuthenticated: !!session,
-    searchFocusPlaylists,
+    playlists: playlists || [],
+    isLoading,
+    isError: !!error,
+    refreshPlaylists: mutate,
     playPlaylist,
     pausePlayback,
     resumePlayback,

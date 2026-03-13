@@ -87,6 +87,9 @@ export function usePomodoro(config: PomodoroConfig = DEFAULT_CONFIG) {
   useEffect(() => {
     if (!isRunning) return;
 
+    // Throttle interval when page is hidden to save power
+    const intervalTime = document.visibilityState === 'visible' ? 500 : 10000;
+
     const interval = setInterval(() => {
       const remaining = calculateRemainingTime();
       setRemainingTime(remaining);
@@ -114,7 +117,7 @@ export function usePomodoro(config: PomodoroConfig = DEFAULT_CONFIG) {
           setRemainingTime(getDuration('work'));
         }
       }
-    }, 500); // Update UI every 500ms
+    }, intervalTime);
 
     return () => clearInterval(interval);
   }, [isRunning, mode, sessionCount, config, getDuration, calculateRemainingTime, sendNotification]);

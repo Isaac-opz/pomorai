@@ -9,6 +9,9 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+
   try {
     const body = await request.json();
     const { contextUri } = body;
@@ -22,7 +25,9 @@ export async function PUT(request: NextRequest) {
       body: JSON.stringify({
         context_uri: contextUri,
       }),
+      signal: controller.signal,
     });
+    clearTimeout(timeoutId);
 
     if (!response.ok && response.status !== 204) {
       const error = await response.text();
@@ -34,7 +39,14 @@ export async function PUT(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: unknown) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === 'AbortError') {
+      return NextResponse.json(
+        { error: 'Spotify API request timed out' },
+        { status: 504 }
+      );
+    }
     console.error('Error playing:', error);
     return NextResponse.json(
       { error: 'Failed to play' },

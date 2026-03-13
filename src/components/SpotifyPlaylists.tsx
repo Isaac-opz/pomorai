@@ -1,29 +1,19 @@
 'use client';
 
 import { useSpotify, SpotifyPlaylist } from '@/hooks/useSpotify';
-import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { Music, Play } from 'lucide-react';
+import { Music, Play, AlertCircle } from 'lucide-react';
 import { GlassCard } from '@/components/ui';
 
 export function SpotifyPlaylists() {
-  const { isAuthenticated, searchFocusPlaylists, playPlaylist, setCurrentPlaylist } = useSpotify();
-  const [playlists, setPlaylists] = useState<SpotifyPlaylist[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  const loadPlaylists = async () => {
-    setLoading(true);
-    const results = await searchFocusPlaylists();
-    setPlaylists(results);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      loadPlaylists();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated]);
+  const { 
+    isAuthenticated, 
+    playlists, 
+    isLoading, 
+    isError, 
+    playPlaylist, 
+    setCurrentPlaylist 
+  } = useSpotify();
 
   const handlePlayPlaylist = (playlist: SpotifyPlaylist) => {
     playPlaylist(`spotify:playlist:${playlist.id}`);
@@ -44,11 +34,19 @@ export function SpotifyPlaylists() {
         <h2 className="text-3xl font-bold text-white tracking-tight">Focus Playlists</h2>
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <div className="text-white/60 text-center py-16">
           <div className="inline-flex items-center gap-3">
             <div className="w-5 h-5 border-2 border-spotify-green border-t-transparent rounded-full animate-spin" />
             <span className="font-medium">Loading playlists...</span>
+          </div>
+        </div>
+      ) : isError ? (
+        <div className="text-white/60 text-center py-16">
+          <div className="inline-flex flex-col items-center gap-3">
+            <AlertCircle className="w-8 h-8 text-red-400" />
+            <span className="font-medium text-red-400">Failed to load playlists.</span>
+            <p className="text-sm">Please check your connection and try again.</p>
           </div>
         </div>
       ) : (
