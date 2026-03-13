@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]/route';
+import { SpotifyPlaylist } from '@/hooks/useSpotify';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   const session = await getServerSession(authOptions);
 
   if (!session?.accessToken) {
@@ -26,8 +27,16 @@ export async function GET(request: NextRequest) {
     const data = await response.json();
     const playlists = data.playlists?.items || [];
     
-    // Filter out any playlists without an ID to prevent errors
-    const validPlaylists = playlists.filter((playlist: any) => playlist && playlist.id);
+    // Map to minimal interface to reduce payload size and filter invalid entries
+    const validPlaylists = playlists
+      .filter((playlist: SpotifyPlaylist) => playlist && playlist.id)
+      .map((playlist: SpotifyPlaylist) => ({
+        id: playlist.id,
+        name: playlist.name,
+        description: playlist.description,
+        images: playlist.images,
+        external_urls: playlist.external_urls,
+      }));
     
     return NextResponse.json(validPlaylists);
   } catch (error) {

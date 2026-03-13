@@ -2,6 +2,7 @@
 
 import { useSpotify, SpotifyPlaylist } from '@/hooks/useSpotify';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { Music, Play } from 'lucide-react';
 import { GlassCard } from '@/components/ui';
 
@@ -61,10 +62,12 @@ export function SpotifyPlaylists() {
               {/* Playlist Cover Image */}
               <div className="relative h-56 bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center overflow-hidden">
                 {playlist.images && playlist.images.length > 0 && playlist.images[0]?.url ? (
-                  <img
+                  <Image
                     src={playlist.images[0].url}
                     alt={playlist.name || 'Playlist'}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 ) : (
                   <Music className="w-20 h-20 text-white/20" />

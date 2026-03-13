@@ -1,14 +1,14 @@
-'use client';
-
 import { PomodoroTimer } from '@/components/PomodoroTimer';
 import { SpotifyPlaylists } from '@/components/SpotifyPlaylists';
 import { SpotifyAuth } from '@/components/SpotifyAuth';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
 
 export default function Home() {
   return (
     <ErrorBoundary>
       <div className="min-h-screen relative">
+        <AnimatedBackground />
         {/* Glass Navigation Bar */}
         <nav className="glass-navbar sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

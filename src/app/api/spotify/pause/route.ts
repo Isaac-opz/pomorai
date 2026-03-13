@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]/route';
 
-export async function PUT(request: NextRequest) {
+export async function PUT(_request: NextRequest) {
   const session = await getServerSession(authOptions);
 
   if (!session?.accessToken) {

@@ -1,4 +1,5 @@
 import NextAuth, { NextAuthOptions } from 'next-auth';
+import { JWT } from 'next-auth/jwt';
 import SpotifyProvider from 'next-auth/providers/spotify';
 
 const scopes = [
@@ -16,7 +17,7 @@ const params = {
 
 const LOGIN_URL = `https://accounts.spotify.com/authorize?${new URLSearchParams(params)}`;
 
-async function refreshAccessToken(token: any) {
+async function refreshAccessToken(token: JWT) {
   try {
     const url = 'https://accounts.spotify.com/api/token';
     
@@ -30,7 +31,7 @@ async function refreshAccessToken(token: any) {
       },
       body: new URLSearchParams({
         grant_type: 'refresh_token',
-        refresh_token: token.refreshToken,
+        refresh_token: (token.refreshToken as string) ?? '',
       }),
     });
 
